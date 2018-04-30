@@ -1,43 +1,52 @@
 require 'pry'
+require 'song'
 
 class Artist
 
-  attr_accessor :name, :songs
+  attr_accessor :name
 
   @@all = []
 
   def initialize(name)
     @name = name
-    @songs = []
-    self.save
-  end
-
-  def add_song(song)
-    self.songs << song
-  end
-
-  def save
-    @@all << self
   end
 
   def self.all
     @@all
   end
 
+  def save
+    if !Artist.all.include?(self)
+      @@all << self
+    end
+  end
+
+  def add_song(song)
+    song.artist = self
+  end
+
+  def songs
+    Song.all.select do |song|
+      song.artist == self
+    end
+  end
+
   def print_songs
-    self.songs.each do |song|
+    songs.map do |song|
+      #binding.pry
       puts song.name
     end
   end
 
   def self.find_or_create_by_name(artist_name)
-    result = self.all.detect { |artist| artist.name == artist_name }
-    #binding.pry
+    result = Artist.all.detect { |artist| artist.name == artist_name }
 
     if result
       result
     else
-      Artist.new(artist_name)
+      new_artist = Artist.new(artist_name)
+      new_artist.save
+      new_artist
     end
   end
 
